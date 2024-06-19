@@ -2,8 +2,9 @@
 FROM node:20 as builder
 
 WORKDIR /app
-COPY . .
-RUN yarn install && yarn build
+
+# You can add here any commands to create the build directory if required, e.g.,
+# RUN mkdir -p /app/build
 
 # Stage 2: Production
 FROM wordpress:php8.3-fpm
@@ -30,7 +31,7 @@ RUN apt-get update && apt-get install -y \
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install extensions
+# Install PHP extensions
 RUN docker-php-ext-install pdo_mysql zip exif pcntl
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install -j$(nproc) gd
@@ -47,9 +48,6 @@ RUN apt-get update && apt-get install -y nodejs
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN apt-get update && apt-get install -y yarn
-
-# Copy build artifacts from the builder stage
-COPY --from=builder /app/build /var/www/html
 
 # Add user for application
 RUN groupadd -g 1000 www
