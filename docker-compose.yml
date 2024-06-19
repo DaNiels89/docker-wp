@@ -59,6 +59,15 @@ services:
     networks:
       - app-network
 
+  wpcli:
+    image: wordpress:cli
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
   server:
     image: nginx:alpine
     depends_on:
